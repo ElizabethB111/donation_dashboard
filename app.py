@@ -100,7 +100,7 @@ map_chart = (
     .add_params(state_select)
     .project(type="albersUsa")
     .properties(width=380, height=250)
-)
+
 
 # -------------------------------------------------
 # LINE – GIFTS BY YEAR
