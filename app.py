@@ -107,7 +107,7 @@ map_chart = (
 # -------------------------------------------------
 line_chart = (
     alt.Chart(df_filt)
-    #.transform_filter(state_select)
+    # .transform_filter(state_select)   
     .mark_line(point=True)
     .encode(
         x=alt.X("Year:O", sort="ascending"),
@@ -117,7 +117,7 @@ line_chart = (
             alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
         ]
     )
-    .add_params(state_select, brush)   # ← declare BOTH selections
+    .add_params(state_select, brush)
     .properties(width=380, height=250)
 )
 
