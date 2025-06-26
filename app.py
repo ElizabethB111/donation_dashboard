@@ -91,7 +91,7 @@ map_chart = (
             alt.Tooltip("Gift_Count:Q",       title="# Gifts")
         ]
     )
-    .transform_lookup(
+    #.transform_lookup(
         lookup="id",
         from_=alt.LookupData(state_totals,
                              key="state_fips",
@@ -107,7 +107,7 @@ map_chart = (
 # -------------------------------------------------
 line_chart = (
     alt.Chart(df_filt)
-    .transform_filter(state_select)
+    #.transform_filter(state_select)
     .mark_line(point=True)
     .encode(
         x=alt.X("Year:O", sort="ascending"),
@@ -126,7 +126,7 @@ line_chart = (
 # -------------------------------------------------
 bar_college = (
     alt.Chart(df_filt)
-    .transform_filter(state_select)
+    #.transform_filter(state_select)
     .mark_bar()
     .encode(
         y=alt.Y("College:N", sort="-x", title="College"),
@@ -145,8 +145,8 @@ bar_college = (
 # -------------------------------------------------
 bar_sub = (
     alt.Chart(df_filt)
-    .transform_filter(state_select)
-    .transform_filter(brush)
+    #.transform_filter(state_select)
+    #.transform_filter(brush)
     .mark_bar()
     .encode(
         y=alt.Y("Allocation Subcategory:N", sort="-x",
