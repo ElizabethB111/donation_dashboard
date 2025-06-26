@@ -1,6 +1,3 @@
-########################
-# app.py – Streamlit   #
-########################
 import streamlit as st
 import pandas as pd
 import altair as alt
@@ -40,20 +37,15 @@ st.write("Loaded rows:", len(df))   # quick sanity check
 # SIDEBAR FILTERS
 # -------------------------------------------------
 st.sidebar.header("Filters")
-
-# Build options list, including "All"
 col_opts = ["All"] + sorted(df["College"].dropna().unique())
 mot_opts = ["All"] + sorted(df["Gift Allocation"].dropna().unique())
 
-# Selectboxes for filtering
 col_pick = st.sidebar.selectbox("College", col_opts, index=0)
 mot_pick = st.sidebar.selectbox("Motivation (Gift Allocation)", mot_opts, index=0)
 
-# Debug: Show current selections in sidebar
 st.sidebar.write(f"Selected College: {col_pick}")
 st.sidebar.write(f"Selected Motivation: {mot_pick}")
 
-# Apply filters
 mask = pd.Series(True, index=df.index)
 if col_pick != "All":
     mask &= df["College"] == col_pick
@@ -61,19 +53,22 @@ if mot_pick != "All":
     mask &= df["Gift Allocation"] == mot_pick
 df_filt = df[mask]
 
-# Debug: filtered rows count in main page
 st.write("Filtered rows:", len(df_filt))
+st.dataframe(df_filt.head(5))  # show first 5 rows for sanity
 
 # -------------------------------------------------
-# SELECTIONS
+# SELECTIONS (empty="all" to show all data initially)
 # -------------------------------------------------
 state_select = alt.selection_point(fields=["state_fips"], toggle=False, empty="all")
 brush = alt.selection_interval(encodings=["x"], empty="all")
-subcategory_select = alt.selection_point(fields=["Allocation Subcategory"], toggle="event.shiftKey", empty="all")
-
+subcategory_select = alt.selection_point(
+    fields=["Allocation Subcategory"],
+    toggle="event.shiftKey",
+    empty="all"
+)
 
 # -------------------------------------------------
-# CHOROPLETH MAP (commented out transform_lookup for now)
+# CHOROPLETH MAP
 # -------------------------------------------------
 state_totals = (
     df_filt.groupby("state_fips", as_index=False)
@@ -98,12 +93,12 @@ map_chart = (
             alt.Tooltip("Gift_Count:Q",       title="# Gifts")
         ]
     )
-    # .transform_lookup(
-    #     lookup="id",
-    #     from_=alt.LookupData(state_totals,
-    #                          key="state_fips",
-    #                          fields=["Gift_Amount_sum", "Gift_Count"])
-    # )
+    .transform_lookup(
+        lookup="id",
+        from_=alt.LookupData(state_totals,
+                             key="state_fips",
+                             fields=["Gift_Amount_sum", "Gift_Count"])
+    )
     .add_params(state_select)
     .project(type="albersUsa")
     .properties(width=380, height=250)
@@ -114,7 +109,7 @@ map_chart = (
 # -------------------------------------------------
 line_chart = (
     alt.Chart(df_filt)
-    # .transform_filter(state_select)
+    .transform_filter(state_select)
     .mark_line(point=True)
     .encode(
         x=alt.X("Year:O", sort="ascending"),
@@ -133,7 +128,7 @@ line_chart = (
 # -------------------------------------------------
 bar_college = (
     alt.Chart(df_filt)
-    # .transform_filter(state_select)
+    .transform_filter(state_select)
     .mark_bar()
     .encode(
         y=alt.Y("College:N", sort="-x", title="College"),
@@ -152,15 +147,13 @@ bar_college = (
 # -------------------------------------------------
 bar_sub = (
     alt.Chart(df_filt)
-    # .transform_filter(state_select)
-    # .transform_filter(brush)
+    .transform_filter(state_select)
+    .transform_filter(brush)
     .mark_bar()
     .encode(
-        y=alt.Y("Allocation Subcategory:N", sort="-x",
-                title="Allocation Sub-category"),
+        y=alt.Y("Allocation Subcategory:N", sort="-x", title="Allocation Sub-category"),
         x=alt.X("sum(Gift Amount):Q", title="Total Gifts ($)"),
-        color=alt.condition(subcategory_select,
-                            alt.value("#1f77b4"), alt.value("lightgray")),
+        color=alt.condition(subcategory_select, alt.value("#1f77b4"), alt.value("lightgray")),
         tooltip=[
             alt.Tooltip("Allocation Subcategory:N", title="Sub-category"),
             alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
