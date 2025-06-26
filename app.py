@@ -4,6 +4,7 @@ import altair as alt
 from vega_datasets import data
 import us
 pip install --upgrade altair
+streamlit run app.py
 
 
 
