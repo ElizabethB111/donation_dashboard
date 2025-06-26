@@ -76,8 +76,8 @@ state_totals = (
 
 states = alt.topo_feature(data.us_10m.url, "states")
 map_chart = (
-alt.Chart(states))
-.mark_geoshape(stroke="white", strokeWidth=0.5)
+    alt.Chart(states)
+    .mark_geoshape(stroke="white", strokeWidth=0.5)
     .encode(
         color=alt.condition(
             state_select,
@@ -91,16 +91,16 @@ alt.Chart(states))
             alt.Tooltip("Gift_Count:Q",       title="# Gifts")
         ]
     )
-    #.transform_lookup(
-        lookup="id",
-        from_=alt.LookupData(state_totals,
-                             key="state_fips",
-                             fields=["Gift_Amount_sum", "Gift_Count"])
-    
+    # .transform_lookup(
+    #     lookup="id",
+    #     from_=alt.LookupData(state_totals,
+    #                          key="state_fips",
+    #                          fields=["Gift_Amount_sum", "Gift_Count"])
+    # )
     .add_params(state_select)
     .project(type="albersUsa")
     .properties(width=380, height=250)
-
+)
 
 # -------------------------------------------------
 # LINE – GIFTS BY YEAR
@@ -126,7 +126,7 @@ line_chart = (
 # -------------------------------------------------
 bar_college = (
     alt.Chart(df_filt)
-    #.transform_filter(state_select)
+    # .transform_filter(state_select)
     .mark_bar()
     .encode(
         y=alt.Y("College:N", sort="-x", title="College"),
@@ -136,7 +136,7 @@ bar_college = (
             alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
         ]
     )
-    .add_params(state_select)          # ← declare state_select
+    .add_params(state_select)
     .properties(width=380, height=400)
 )
 
@@ -145,8 +145,8 @@ bar_college = (
 # -------------------------------------------------
 bar_sub = (
     alt.Chart(df_filt)
-    #.transform_filter(state_select)
-    #.transform_filter(brush)
+    # .transform_filter(state_select)
+    # .transform_filter(brush)
     .mark_bar()
     .encode(
         y=alt.Y("Allocation Subcategory:N", sort="-x",
@@ -159,7 +159,7 @@ bar_sub = (
             alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
         ]
     )
-    .add_params(state_select, brush, subcategory_select)  # ← declare all three
+    .add_params(state_select, brush, subcategory_select)
     .properties(width=380, height=400)
 )
 
@@ -169,3 +169,4 @@ bar_sub = (
 upper = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
 lower = alt.hconcat(bar_college, bar_sub)
 st.altair_chart(alt.vconcat(upper, lower), use_container_width=True)
+
