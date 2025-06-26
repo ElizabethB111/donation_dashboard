@@ -77,7 +77,7 @@ state_totals = (
 states = alt.topo_feature(data.us_10m.url, "states")
 map_chart = (
 alt.Chart(states))
-    .mark_geoshape(stroke="white", strokeWidth=0.5)
+.mark_geoshape(stroke="white", strokeWidth=0.5)
     .encode(
         color=alt.condition(
             state_select,
