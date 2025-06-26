@@ -1,10 +1,10 @@
+!pip install "altair[all]==5.5.0"
 import streamlit as st
 import pandas as pd
 import altair as alt
 from vega_datasets import data
 import us
-pip install --upgrade altair
-streamlit run app.py
+
 
 
 
