@@ -57,6 +57,7 @@ st.subheader("DEBUG – first 5 rows after filtering")
 st.dataframe(df_filt.head())
 st.write("Columns:", df_filt.columns.tolist())
 # ------------------
+st.write("Gift Amount dtype:", df_filt["Gift Amount"].dtype)
 
 # -------------------------------------------------
 # SELECTIONS
