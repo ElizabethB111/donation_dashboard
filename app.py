@@ -35,6 +35,11 @@ def load_data():
 
 df = load_data()
 st.write("Loaded rows:", len(df))   # quick sanity check
+st.write("Sample data (first 5 rows):")
+st.dataframe(df.head())
+
+st.write("Unique Colleges:", sorted(df["College"].dropna().unique()))
+st.write("Unique Gift Allocations:", sorted(df["Gift Allocation"].dropna().unique()))
 
 # -------------------------------------------------
 # SIDEBAR FILTERS
