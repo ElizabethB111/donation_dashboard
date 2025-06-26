@@ -35,8 +35,7 @@ def load_data():
 
 df = load_data()
 st.write("Loaded rows:", len(df))   # quick sanity check
-st.write("Filtered rows:", len(df_filt))
-st.dataframe(df_filt.head(10))
+
 
 
 # -------------------------------------------------
@@ -55,7 +54,8 @@ if col_pick != "All":
 if mot_pick != "All":
     mask &= df["Gift Allocation"] == mot_pick
 df_filt = df[mask]
-
+st.write("Filtered rows:", len(df_filt))
+st.dataframe(df_filt.head(10))
 
 # -------------------------------------------------
 # SELECTIONS
