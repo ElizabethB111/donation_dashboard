@@ -96,7 +96,7 @@ alt.Chart(states))
         from_=alt.LookupData(state_totals,
                              key="state_fips",
                              fields=["Gift_Amount_sum", "Gift_Count"])
-    )
+    
     .add_params(state_select)
     .project(type="albersUsa")
     .properties(width=380, height=250)
