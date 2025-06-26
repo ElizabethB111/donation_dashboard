@@ -35,11 +35,6 @@ def load_data():
 
 df = load_data()
 st.write("Loaded rows:", len(df))   # quick sanity check
-st.write("Sample data (first 5 rows):")
-st.dataframe(df.head())
-
-st.write("Unique Colleges:", sorted(df["College"].dropna().unique()))
-st.write("Unique Gift Allocations:", sorted(df["Gift Allocation"].dropna().unique()))
 
 # -------------------------------------------------
 # SIDEBAR FILTERS
@@ -50,15 +45,15 @@ st.sidebar.header("Filters")
 col_opts = ["All"] + sorted(df["College"].dropna().unique())
 mot_opts = ["All"] + sorted(df["Gift Allocation"].dropna().unique())
 
-# Selectboxes
+# Selectboxes for filtering
 col_pick = st.sidebar.selectbox("College", col_opts, index=0)
 mot_pick = st.sidebar.selectbox("Motivation (Gift Allocation)", mot_opts, index=0)
 
-# Debug print selections
+# Debug: Show current selections in sidebar
 st.sidebar.write(f"Selected College: {col_pick}")
 st.sidebar.write(f"Selected Motivation: {mot_pick}")
 
-# Filter mask
+# Apply filters
 mask = pd.Series(True, index=df.index)
 if col_pick != "All":
     mask &= df["College"] == col_pick
@@ -66,16 +61,13 @@ if mot_pick != "All":
     mask &= df["Gift Allocation"] == mot_pick
 df_filt = df[mask]
 
-# Debug filtered rows count
+# Debug: filtered rows count in main page
 st.write("Filtered rows:", len(df_filt))
-
-
-
 
 # -------------------------------------------------
 # SELECTIONS
 # -------------------------------------------------
-state_select = alt.selection_point(fields=["state_fips"], toggle=False, empty='all')  # <-- key fix here
+state_select = alt.selection_point(fields=["state_fips"], toggle=False, empty=True)
 brush         = alt.selection_interval(encodings=["x"])
 subcategory_select = alt.selection_point(
     fields=["Allocation Subcategory"],
@@ -84,7 +76,7 @@ subcategory_select = alt.selection_point(
 )
 
 # -------------------------------------------------
-# CHOROPLETH MAP  (now with true count + sum)
+# CHOROPLETH MAP (commented out transform_lookup for now)
 # -------------------------------------------------
 state_totals = (
     df_filt.groupby("state_fips", as_index=False)
@@ -109,12 +101,12 @@ map_chart = (
             alt.Tooltip("Gift_Count:Q",       title="# Gifts")
         ]
     )
-    .transform_lookup(
-        lookup="id",
-        from_=alt.LookupData(state_totals,
-                             key="state_fips",
-                             fields=["Gift_Amount_sum", "Gift_Count"])
-    )
+    # .transform_lookup(
+    #     lookup="id",
+    #     from_=alt.LookupData(state_totals,
+    #                          key="state_fips",
+    #                          fields=["Gift_Amount_sum", "Gift_Count"])
+    # )
     .add_params(state_select)
     .project(type="albersUsa")
     .properties(width=380, height=250)
@@ -125,7 +117,7 @@ map_chart = (
 # -------------------------------------------------
 line_chart = (
     alt.Chart(df_filt)
-    .transform_filter(state_select)
+    # .transform_filter(state_select)
     .mark_line(point=True)
     .encode(
         x=alt.X("Year:O", sort="ascending"),
@@ -144,7 +136,7 @@ line_chart = (
 # -------------------------------------------------
 bar_college = (
     alt.Chart(df_filt)
-    .transform_filter(state_select)
+    # .transform_filter(state_select)
     .mark_bar()
     .encode(
         y=alt.Y("College:N", sort="-x", title="College"),
@@ -163,27 +155,6 @@ bar_college = (
 # -------------------------------------------------
 bar_sub = (
     alt.Chart(df_filt)
-    .transform_filter(state_select)
-    .transform_filter(brush)
-    .mark_bar()
-    .encode(
-        y=alt.Y("Allocation Subcategory:N", sort="-x",
-                title="Allocation Sub-category"),
-        x=alt.X("sum(Gift Amount):Q", title="Total Gifts ($)"),
-        color=alt.condition(subcategory_select,
-                            alt.value("#1f77b4"), alt.value("lightgray")),
-        tooltip=[
-            alt.Tooltip("Allocation Subcategory:N", title="Sub-category"),
-            alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
-        ]
-    )
-    .add_params(state_select, brush, subcategory_select)
-    .properties(width=380, height=400)
-)
+    # .transform_filter(state_select)
+    # .tra
 
-# -------------------------------------------------
-# LAYOUT
-# -------------------------------------------------
-upper = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
-lower = alt.hconcat(bar_college, bar_sub)
-st.altair_chart(alt.vconcat(upper, lower), use_container_width=True)
