@@ -156,5 +156,27 @@ bar_college = (
 bar_sub = (
     alt.Chart(df_filt)
     # .transform_filter(state_select)
-    # .tra
+    # .transform_filter(brush)
+    .mark_bar()
+    .encode(
+        y=alt.Y("Allocation Subcategory:N", sort="-x",
+                title="Allocation Sub-category"),
+        x=alt.X("sum(Gift Amount):Q", title="Total Gifts ($)"),
+        color=alt.condition(subcategory_select,
+                            alt.value("#1f77b4"), alt.value("lightgray")),
+        tooltip=[
+            alt.Tooltip("Allocation Subcategory:N", title="Sub-category"),
+            alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
+        ]
+    )
+    .add_params(state_select, brush, subcategory_select)
+    .properties(width=380, height=400)
+)
+
+# -------------------------------------------------
+# LAYOUT
+# -------------------------------------------------
+upper = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
+lower = alt.hconcat(bar_college, bar_sub)
+st.altair_chart(alt.vconcat(upper, lower), use_container_width=True)
 
