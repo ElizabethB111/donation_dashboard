@@ -117,7 +117,7 @@ line_chart = (
             alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
         ]
     )
-    .add_params(brush)
+    .add_params(state_select, brush)   # ← declare BOTH selections
     .properties(width=380, height=250)
 )
 
@@ -136,6 +136,7 @@ bar_college = (
             alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
         ]
     )
+    .add_params(state_select)          # ← declare state_select
     .properties(width=380, height=400)
 )
 
@@ -158,7 +159,7 @@ bar_sub = (
             alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
         ]
     )
-    .add_params(subcategory_select)
+    .add_params(state_select, brush, subcategory_select)  # ← declare all three
     .properties(width=380, height=400)
 )
 # --- TEMP SINGLE-CHART DEBUG -----------------
