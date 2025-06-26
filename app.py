@@ -131,7 +131,11 @@ bar_sub = (
     .add_params(subcategory_select)
     .properties(width=380, height=400)
 )
+st.write("Filtered data for charts:")
+st.write(df_filt)
 
+st.write("State totals for choropleth map:")
+st.write(state_totals)
 # ---------- LAYOUT ----------
 upper = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
 lower = alt.hconcat(bar_college, bar_sub)
