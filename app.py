@@ -36,8 +36,6 @@ def load_data():
 df = load_data()
 st.write("Loaded rows:", len(df))   # quick sanity check
 
-
-
 # -------------------------------------------------
 # SIDEBAR FILTERS
 # -------------------------------------------------
@@ -54,13 +52,13 @@ if col_pick != "All":
 if mot_pick != "All":
     mask &= df["Gift Allocation"] == mot_pick
 df_filt = df[mask]
-st.write("Filtered rows:", len(df_filt))
-st.dataframe(df_filt.head(10))
+
+st.write("Filtered rows:", len(df_filt))  # confirm filter applied
 
 # -------------------------------------------------
 # SELECTIONS
 # -------------------------------------------------
-state_select = alt.selection_point(fields=["state_fips"], toggle=False, empty=True)
+state_select = alt.selection_point(fields=["state_fips"], toggle=False, empty='all')  # <-- key fix here
 brush         = alt.selection_interval(encodings=["x"])
 subcategory_select = alt.selection_point(
     fields=["Allocation Subcategory"],
@@ -94,12 +92,12 @@ map_chart = (
             alt.Tooltip("Gift_Count:Q",       title="# Gifts")
         ]
     )
-    # .transform_lookup(
-    #     lookup="id",
-    #     from_=alt.LookupData(state_totals,
-    #                          key="state_fips",
-    #                          fields=["Gift_Amount_sum", "Gift_Count"])
-    # )
+    .transform_lookup(
+        lookup="id",
+        from_=alt.LookupData(state_totals,
+                             key="state_fips",
+                             fields=["Gift_Amount_sum", "Gift_Count"])
+    )
     .add_params(state_select)
     .project(type="albersUsa")
     .properties(width=380, height=250)
@@ -110,7 +108,7 @@ map_chart = (
 # -------------------------------------------------
 line_chart = (
     alt.Chart(df_filt)
-    # .transform_filter(state_select)   
+    .transform_filter(state_select)
     .mark_line(point=True)
     .encode(
         x=alt.X("Year:O", sort="ascending"),
@@ -129,7 +127,7 @@ line_chart = (
 # -------------------------------------------------
 bar_college = (
     alt.Chart(df_filt)
-    # .transform_filter(state_select)
+    .transform_filter(state_select)
     .mark_bar()
     .encode(
         y=alt.Y("College:N", sort="-x", title="College"),
@@ -148,8 +146,8 @@ bar_college = (
 # -------------------------------------------------
 bar_sub = (
     alt.Chart(df_filt)
-    # .transform_filter(state_select)
-    # .transform_filter(brush)
+    .transform_filter(state_select)
+    .transform_filter(brush)
     .mark_bar()
     .encode(
         y=alt.Y("Allocation Subcategory:N", sort="-x",
@@ -172,4 +170,3 @@ bar_sub = (
 upper = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
 lower = alt.hconcat(bar_college, bar_sub)
 st.altair_chart(alt.vconcat(upper, lower), use_container_width=True)
-
