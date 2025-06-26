@@ -67,8 +67,7 @@ subcategory_select = alt.selection_point(
 # -------------------------------------------------
 # CHOROPLETH MAP
 # -------------------------------------------------
-st.write("Rendering choropleth map...")
-st.altair_chart(map_chart, use_container_width=True)
+
 state_totals = (
     df_filt.groupby("state_fips", as_index=False)
            .agg(Gift_Amount_sum=("Gift Amount", "sum"),
