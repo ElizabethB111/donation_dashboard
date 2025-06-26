@@ -35,6 +35,9 @@ def load_data():
 
 df = load_data()
 st.write("Loaded rows:", len(df))   # quick sanity check
+st.write("Filtered rows:", len(df_filt))
+st.dataframe(df_filt.head(10))
+
 
 # -------------------------------------------------
 # SIDEBAR FILTERS
