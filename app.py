@@ -52,12 +52,7 @@ if col_pick != "All":
 if mot_pick != "All":
     mask &= df["Gift Allocation"] == mot_pick
 df_filt = df[mask]
-# --- TEMP DEBUG ---
-st.subheader("DEBUG – first 5 rows after filtering")
-st.dataframe(df_filt.head())
-st.write("Columns:", df_filt.columns.tolist())
-# ------------------
-st.write("Gift Amount dtype:", df_filt["Gift Amount"].dtype)
+
 
 # -------------------------------------------------
 # SELECTIONS
@@ -166,6 +161,20 @@ bar_sub = (
     .add_params(subcategory_select)
     .properties(width=380, height=400)
 )
+# --- TEMP SINGLE-CHART DEBUG -----------------
+st.subheader("Single-chart render test")
+
+tabs = st.tabs(["Map", "Line", "College bar", "Sub-cat bar"])
+
+with tabs[0]:
+    st.altair_chart(map_chart, use_container_width=True)
+with tabs[1]:
+    st.altair_chart(line_chart, use_container_width=True)
+with tabs[2]:
+    st.altair_chart(bar_college, use_container_width=True)
+with tabs[3]:
+    st.altair_chart(bar_sub, use_container_width=True)
+# ---------------------------------------------
 
 # -------------------------------------------------
 # LAYOUT
