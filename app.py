@@ -67,13 +67,10 @@ st.write("Filtered rows:", len(df_filt))
 # -------------------------------------------------
 # SELECTIONS
 # -------------------------------------------------
-state_select = alt.selection_point(fields=["state_fips"], toggle=False, empty=True)
-brush         = alt.selection_interval(encodings=["x"])
-subcategory_select = alt.selection_point(
-    fields=["Allocation Subcategory"],
-    toggle="event.shiftKey",
-    empty=True
-)
+state_select = alt.selection_point(fields=["state_fips"], toggle=False, empty="all")
+brush = alt.selection_interval(encodings=["x"], empty="all")
+subcategory_select = alt.selection_point(fields=["Allocation Subcategory"], toggle="event.shiftKey", empty="all")
+
 
 # -------------------------------------------------
 # CHOROPLETH MAP (commented out transform_lookup for now)
