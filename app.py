@@ -32,7 +32,11 @@ def load_data():
 
 df = load_data()
 st.write("Loaded rows:", len(df))   # quick sanity check
-
+st.write("Total rows in dataset:", len(df))
+st.write("Rows after filtering:", len(df_filt))
+st.write("Available Colleges:", df["College"].dropna().unique())
+st.write("Selected College:", col_pick)
+st.write("Filtered data sample:", df_filt.head())
 # -------------------------------------------------
 # SIDEBAR FILTERS
 # -------------------------------------------------
