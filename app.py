@@ -52,6 +52,11 @@ if col_pick != "All":
 if mot_pick != "All":
     mask &= df["Gift Allocation"] == mot_pick
 df_filt = df[mask]
+# --- TEMP DEBUG ---
+st.subheader("DEBUG – first 5 rows after filtering")
+st.dataframe(df_filt.head())
+st.write("Columns:", df_filt.columns.tolist())
+# ------------------
 
 # -------------------------------------------------
 # SELECTIONS
