@@ -53,13 +53,6 @@ if mot_pick != "All":
     mask &= df["Gift Allocation"] == mot_pick
 df_filt = df[mask]
 
-st.write("Filtered rows:", len(df_filt))
-st.dataframe(df_filt.head(5))  # show first 5 rows for sanity
-st.write("Total rows in dataset:", len(df))
-st.write("Rows after filtering:", len(df_filt))
-st.write("Available Colleges:", df["College"].dropna().unique())
-st.write("Selected College:", col_pick)
-st.write("Filtered data sample:", df_filt.head())
 # -------------------------------------------------
 # SELECTIONS (empty="all" to show all data initially)
 # -------------------------------------------------
@@ -74,6 +67,8 @@ subcategory_select = alt.selection_point(
 # -------------------------------------------------
 # CHOROPLETH MAP
 # -------------------------------------------------
+st.write("Rendering choropleth map...")
+st.altair_chart(map_chart, use_container_width=True)
 state_totals = (
     df_filt.groupby("state_fips", as_index=False)
            .agg(Gift_Amount_sum=("Gift Amount", "sum"),
