@@ -45,24 +45,30 @@ st.write("Unique Gift Allocations:", sorted(df["Gift Allocation"].dropna().uniqu
 # SIDEBAR FILTERS
 # -------------------------------------------------
 st.sidebar.header("Filters")
+
+# Build options list, including "All"
 col_opts = ["All"] + sorted(df["College"].dropna().unique())
 mot_opts = ["All"] + sorted(df["Gift Allocation"].dropna().unique())
 
+# Selectboxes
 col_pick = st.sidebar.selectbox("College", col_opts, index=0)
 mot_pick = st.sidebar.selectbox("Motivation (Gift Allocation)", mot_opts, index=0)
 
+# Debug print selections
 st.sidebar.write(f"Selected College: {col_pick}")
 st.sidebar.write(f"Selected Motivation: {mot_pick}")
 
+# Filter mask
 mask = pd.Series(True, index=df.index)
 if col_pick != "All":
     mask &= df["College"] == col_pick
 if mot_pick != "All":
     mask &= df["Gift Allocation"] == mot_pick
-
 df_filt = df[mask]
 
+# Debug filtered rows count
 st.write("Filtered rows:", len(df_filt))
+
 
 
 # -------------------------------------------------
