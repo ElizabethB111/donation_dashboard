@@ -162,7 +162,6 @@ bar_sub = (
     .add_params(state_select, brush, subcategory_select)  # ← declare all three
     .properties(width=380, height=400)
 )
-------------------------------------
 
 # -------------------------------------------------
 # LAYOUT
