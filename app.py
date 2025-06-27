@@ -16,23 +16,30 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------- DATA ----------
 @st.cache_data
 def load_data():
     df = pd.read_csv("university-donations.csv")
 
-    # 1️⃣  parse all date strings, whatever the format
+    # --- clean dates ---------------------------------------------------------
     df["Gift Date"] = pd.to_datetime(df["Gift Date"], errors="coerce")
-
-    # 2️⃣  discard rows whose dates could not be read
     df = df.dropna(subset=["Gift Date"])
 
+    # 🔹 strip $ and commas, coerce to float
+    df["Gift Amount"] = (
+        df["Gift Amount"]
+          .astype(str)
+          .str.replace(r"[$,]", "", regex=True)
+          .astype(float)
+    )
+    df = df.dropna(subset=["Gift Amount"])   # drop any non-numeric rows
+
+    # --- add calendar helpers -----------------------------------------------
     df["Year"]      = df["Gift Date"].dt.year
     df["YearMonth"] = df["Gift Date"].dt.to_period("M").astype(str)
 
-    # keep FIPS codes as the two-digit strings
-    state_id = {s.abbr: s.fips for s in us.states.STATES}
-    df["state_fips"] = df["State"].map(state_id).astype(str)
+    # --- keep 2-digit string FIPS codes to join with topojson ---------------
+    state_id            = {s.abbr: s.fips for s in us.states.STATES}
+    df["state_fips"]    = df["State"].map(state_id).astype(str)
 
     return df
 
