@@ -4,8 +4,6 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-import json
-import urllib.request
 
 # --- FIX #2: lift Altair’s 5 000-row cap (do this once) ----------------------
 alt.data_transformers.disable_max_rows()
@@ -42,12 +40,12 @@ def load_data():
     
     # --- keep numeric FIPS codes so they match the topojson ----------------------
 
-    # Map state abbreviation to FIPS code as zero-padded strings
+    # --- FIPS codes as the 2-digit strings that match topojson -------------------
+
     state_id = {s.abbr: s.fips for s in us.states.STATES}  # keep as string with leading zeros
     df["state_fips"] = df["State"].map(state_id)
     df = df.dropna(subset=["state_fips"])   # Drop rows where state_fips is NaN
-
-    # state_fips stays as zero-padded strings — DO NOT convert to int here
+    df["state_fips"] = df["state_fips"].astype(str)  # keep zero-padded strings
 
     return df
 
@@ -79,13 +77,15 @@ state_totals = (
            .rename(columns={"Gift Amount": "total_gift"})
 )
 
+import json
+import urllib.request
+
 # Load topojson from vega datasets
 url = data.us_10m.url
 with urllib.request.urlopen(url) as response:
     topojson_data = json.load(response)
 
-# Zero-pad topojson IDs to 2 digits for exact matching with df
-topo_ids = {str(int(feature["id"])).zfill(2) for feature in topojson_data["objects"]["states"]["geometries"]}
+topo_ids = {str(feature["id"]) for feature in topojson_data["objects"]["states"]["geometries"]}
 df_state_fips = set(state_totals["state_fips"])
 
 missing_in_topo = df_state_fips - topo_ids
@@ -102,9 +102,14 @@ subcategory_select = alt.selection_point(fields=["Allocation Subcategory"],
 
 # ---------- CHOROPLETH MAP ---------------------------------------------------
 states = alt.topo_feature(data.us_10m.url, "states")
-st.write(state_totals.head())
+
+# <-- FIXED map_chart with transform_calculate to zero-pad topojson ids -->
 map_chart = (
     alt.Chart(states)
+    .transform_calculate(
+        # convert numeric id to zero-padded string to match df keys
+        state_fips="format(datum.id, '02d')"
+    )
     .mark_geoshape(stroke="white", strokeWidth=0.5)
     .encode(
         color=alt.condition(
@@ -117,11 +122,12 @@ map_chart = (
             alt.value("lightgray")
         ),
         tooltip=[
-            alt.Tooltip("total_gift:Q", title="Total Gifts ($)", format=",.0f")
+            alt.Tooltip("total_gift:Q", title="Total Gifts ($)", format=",.0f"),
+            alt.Tooltip("state_fips:N", title="State FIPS")
         ]
     )
     .transform_lookup(
-        lookup="id",
+        lookup="state_fips",  # <-- lookup on calculated zero-padded string
         from_=alt.LookupData(
             state_totals,
             key="state_fips",
