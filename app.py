@@ -67,11 +67,17 @@ col_pick = st.sidebar.selectbox("College", col_opts, index=0)
 mot_pick = st.sidebar.selectbox("Motivation (Gift Allocation)", mot_opts, index=0)
 
 mask = pd.Series(True, index=df.index)
-if col_pick != "All":
+
+if col_pick != "All" and col_pick in df["College"].unique():
     mask &= df["College"] == col_pick
-if mot_pick != "All":
+
+if mot_pick != "All" and mot_pick in df["Gift Allocation"].unique():
     mask &= df["Gift Allocation"] == mot_pick
+
 df_filt = df[mask]
+st.write("Filtered rows:", len(df_filt))
+st.write("Filtered df_filt sample:", df_filt.head())
+st.write("Gift Amount summary:", df_filt["Gift Amount"].describe())
 
 # Aggregate gift sums by state
 state_totals = (
