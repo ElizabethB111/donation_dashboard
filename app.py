@@ -163,4 +163,5 @@ upper  = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
 lower  = alt.hconcat(bar_college, bar_sub)
 layout = alt.vconcat(upper, lower)
 
-st.altair_chart(layout, use_container_width=True)
+#st.altair_chart(layout, use_container_width=True)
+st.altair_chart(map_chart,    use_container_width=True)   # map only
