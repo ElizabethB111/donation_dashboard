@@ -4,9 +4,10 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+alt.data_transformers.disable_max_rows()
 from vega_datasets import data
 import us
-alt.data_transformers.disable_max_rows()
+
 st.set_page_config(page_title="University Donor Dashboard",
                    layout="wide")
 
