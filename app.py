@@ -26,11 +26,10 @@ def load_data():
 
     # 🔹 strip $ and commas, coerce to float
     df["Gift Amount"] = (
-        df["Gift Amount"]
-          .astype(str)
-          .str.replace(r"[$,]", "", regex=True)
-          .astype(float)
-    )
+        pd.to_numeric(
+            df["Gift Amount"].astype(str).str.replace(r"[^\d\-.]", "", regex=True),
+            errors="coerce"
+        )
     df = df.dropna(subset=["Gift Amount"])   # drop any non-numeric rows
 
     # --- add calendar helpers -----------------------------------------------
