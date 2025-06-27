@@ -167,8 +167,8 @@ layout = alt.vconcat(upper, lower)
 
 # ---- test one chart at a time ----
 # st.altair_chart(map_chart,    use_container_width=True)   # map only
-st.altair_chart(line_chart,   use_container_width=True)   # line only
-# st.altair_chart(bar_college,  use_container_width=True)   # college bars
+# st.altair_chart(line_chart,   use_container_width=True)   # line only
+st.altair_chart(bar_college,  use_container_width=True)   # college bars
 # st.altair_chart(bar_sub,      use_container_width=True)   # sub-category bars
 
 
