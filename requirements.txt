@@ -1,5 +1,6 @@
-streamlit==1.35.0
+streamlit>=1.35
 pandas>=2.2
-altair==5.5.0
-vega_datasets>=0.9 
+altair==5.5.0       
+vega_datasets>=0.9
 us
+rich<14        
