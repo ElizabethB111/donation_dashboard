@@ -28,7 +28,7 @@ def load_data():
     df["Gift Amount"] = (
         pd.to_numeric(
             df["Gift Amount"].astype(str).str.replace(r"[^\d\-.]", "", regex=True),
-            errors="coerce"
+            errors="coerce")
         )
     df = df.dropna(subset=["Gift Amount"])   # drop any non-numeric rows
 
