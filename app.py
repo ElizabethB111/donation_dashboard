@@ -41,6 +41,8 @@ def load_data():
     df["state_fips"]    = df["State"].map(state_id).astype(str)
 
     return df
+st.sidebar.caption(f"Rows after cleaning: {len(df):,}  |  Gift $ min–max: "
+                   f"{df['Gift Amount'].min():,.0f} – {df['Gift Amount'].max():,.0f}")
 
 
 df = load_data()
