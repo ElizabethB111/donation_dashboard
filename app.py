@@ -170,7 +170,7 @@ bar_sub = (
     .properties(width=380, height=400)
 )
 st.text("✅ bar sub built")          # temporary breadcrumb
-
+opacity=alt.condition(state_select, alt.value(1), alt.value(0.3))
 upper  = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
 lower  = alt.hconcat(bar_college, bar_sub)
 layout = alt.vconcat(upper, lower)
