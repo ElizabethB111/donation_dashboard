@@ -35,10 +35,10 @@ def load_data():
     # --- add calendar helpers -----------------------------------------------
     df["Year"]      = df["Gift Date"].dt.year
     df["YearMonth"] = df["Gift Date"].dt.to_period("M").astype(str)
-
-    # --- keep 2-digit string FIPS codes to join with topojson ---------------
-    state_id            = {s.abbr: s.fips for s in us.states.STATES}
-    df["state_fips"]    = df["State"].map(state_id).astype(str)
+    
+    # --- keep numeric FIPS codes so they match the topojson ----------------------
+    state_id = {s.abbr: int(s.fips) for s in us.states.STATES}
+    df["state_fips"] = df["State"].map(state_id)      # int, not str
 
     return df
 
@@ -61,6 +61,11 @@ if mot_pick != "All":
     mask &= df["Gift Allocation"] == mot_pick
 df_filt = df[mask]
 
+# right after you build df_filt
+state_totals = (
+    df_filt.groupby("state_fips", as_index=False)["Gift Amount"].sum()
+)
+
 # ---------- SELECTION DEFINITIONS --------------------------------------------
 state_select       = alt.selection_point(fields=["state_fips"], toggle=False, empty="all")
 brush              = alt.selection_interval(encodings=["x"])
@@ -76,9 +81,11 @@ map_chart = (
     .encode(
         color=alt.condition(
             state_select,
-            alt.Color("sum(Gift Amount):Q",
-                      scale=alt.Scale(scheme="blues",domain=[0, None]),
-                      title="Total Gifts ($)"),
+            alt.Color(
+                "sum(Gift Amount):Q",
+                scale=alt.Scale(scheme="blues", domain=[0, None]),
+                title="Total Gifts ($)"
+            ),
             alt.value("lightgray")
         ),
         tooltip=[
@@ -87,10 +94,10 @@ map_chart = (
         ]
     )
     .transform_lookup(
-        lookup="id",
+        lookup="id",                                 # ← topojson key (ints)
         from_=alt.LookupData(
-            df_filt,
-            key="state_fips",
+            state_totals,                            # ← 1 row per state
+            key="state_fips",                        # ← ints too
             fields=["Gift Amount"]
         )
     )
@@ -98,6 +105,7 @@ map_chart = (
     .project(type="albersUsa")
     .properties(width=380, height=250)
 )
+
 st.text("✅ map built")          # temporary breadcrumb
 
 # ---------- LINE: GIFTS BY YEAR ----------------------------------------------
@@ -113,7 +121,7 @@ line_chart = (
             alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
         ]
     )
-    .add_params(brush)
+    .add_params(state_select, brush)
     .properties(width=380, height=250)
 )
 st.text("✅ line chart built")          # temporary breadcrumb
@@ -131,6 +139,7 @@ bar_college = (
             alt.Tooltip("sum(Gift Amount):Q",  title="Total Gifts ($)", format=",.0f")
         ]
     )
+    .add_params(state_select)
     .properties(width=380, height=400)
 )
 st.text("✅ bar built")          # temporary breadcrumb
@@ -153,20 +162,17 @@ bar_sub = (
             alt.Tooltip("sum(Gift Amount):Q",       title="Total Gifts ($)", format=",.0f")
         ]
     )
-    .add_params(subcategory_select)
+    .add_params(state_select, subcategory_select)
     .properties(width=380, height=400)
 )
 st.text("✅ bar sub built")          # temporary breadcrumb
 
-layout = (
-    alt.vconcat(
-        alt.hconcat(map_chart, line_chart).resolve_scale(color="independent"),
-        alt.hconcat(bar_college, bar_sub)
-    )
-    .add_params(state_select, brush, subcategory_select)
-)
+upper  = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
+lower  = alt.hconcat(bar_college, bar_sub)
+layout = alt.vconcat(upper, lower)
 
 st.altair_chart(layout, use_container_width=True)
+
 
 
 # ---- test one chart at a time ----
