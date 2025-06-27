@@ -37,9 +37,9 @@ def load_data():
     df["YearMonth"] = df["Gift Date"].dt.to_period("M").astype(str)
     
     # --- keep numeric FIPS codes so they match the topojson ----------------------
-    # --- FIPS codes as 2-digit strings ("01", "06", …) ---------------------------
-    state_id = {s.abbr: s.fips for s in us.states.STATES}        # s.fips is already "01"
-    df["state_fips"] = df["State"].map(state_id).astype(str).str.zfill(2)
+
+    state_id = {s.abbr: int(s.fips) for s in us.states.STATES}   # ints: 1, 2, 4, …
+    df["state_fips"] = df["State"].map(state_id).astype("Int64")  # nullable int
 
 
     return df
@@ -66,6 +66,7 @@ df_filt = df[mask]
 # right after you build df_filt
 state_totals = (
     df_filt.groupby("state_fips", as_index=False)["Gift Amount"].sum()
+           .rename(columns={"Gift Amount": "total_gift"})
 )
 
 # ---------- SELECTION DEFINITIONS --------------------------------------------
@@ -76,7 +77,7 @@ subcategory_select = alt.selection_point(fields=["Allocation Subcategory"],
 
 # ---------- CHOROPLETH MAP ---------------------------------------------------
 states = alt.topo_feature(data.us_10m.url, "states")
-
+st.write(state_totals.head())
 map_chart = (
     alt.Chart(states)
     .mark_geoshape(stroke="white", strokeWidth=0.5)
@@ -84,29 +85,29 @@ map_chart = (
         color=alt.condition(
             state_select,
             alt.Color(
-                "sum(Gift Amount):Q",
+                "total_gift:Q",                       # ← no sum(), just the field
                 scale=alt.Scale(scheme="blues", domain=[0, None]),
                 title="Total Gifts ($)"
             ),
             alt.value("lightgray")
         ),
         tooltip=[
-            alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f"),
-            alt.Tooltip("count():Q",          title="# Gifts")
+            alt.Tooltip("total_gift:Q", title="Total Gifts ($)", format=",.0f")
         ]
     )
     .transform_lookup(
-        lookup="id",                                 # ← topojson key (ints)
+        lookup="id",                      # int IDs from the topojson
         from_=alt.LookupData(
-            state_totals,                            # ← 1 row per state
-            key="state_fips",                        # ← ints too
-            fields=["Gift Amount"]
+            state_totals,                 # 1 row per state
+            key="state_fips",             # int keys too
+            fields=["total_gift"]
         )
     )
     .add_params(state_select)
     .project(type="albersUsa")
     .properties(width=380, height=250)
 )
+
 
 st.text("✅ map built")          # temporary breadcrumb
 
