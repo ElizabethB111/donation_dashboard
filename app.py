@@ -44,7 +44,7 @@ def load_data():
 
     state_id = {s.abbr: s.fips for s in us.states.STATES}  # keep as string with leading zeros
     df["state_fips"] = df["State"].map(state_id)
-    # Convert zero-padded 'state_fips' strings like "01" to unpadded strings like "1"
+    df = df.dropna(subset=["state_fips"])   # Drop rows where state_fips is NaN
     df["state_fips"] = df["state_fips"].astype(int).astype(str)
 
 
