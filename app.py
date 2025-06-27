@@ -177,6 +177,7 @@ layout = alt.vconcat(upper, lower)
 
 st.altair_chart(layout, use_container_width=True)
 
+st.write(df_filt.head())
 
 
 # ---- test one chart at a time ----
