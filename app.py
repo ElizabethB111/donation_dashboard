@@ -39,21 +39,21 @@ def load_data():
     # --- add calendar helpers -----------------------------------------------
     df["Year"]      = df["Gift Date"].dt.year
     df["YearMonth"] = df["Gift Date"].dt.to_period("M").astype(str)
+    
+    # --- keep numeric FIPS codes so they match the topojson ----------------------
 
-    # --- FIPS codes as zero-padded 2-digit strings to match topojson -----------
-    state_id = {s.abbr: s.fips for s in us.states.STATES}  # e.g. 'CA' → '06'
+    # Map state abbreviation to FIPS code as zero-padded strings
+    state_id = {s.abbr: s.fips for s in us.states.STATES}  # keep as string with leading zeros
     df["state_fips"] = df["State"].map(state_id)
-    df = df.dropna(subset=["state_fips"])  # drop rows with missing states
-    df["state_fips"] = df["state_fips"].astype(str).str.zfill(2)  # ensure zero-padding
+    df = df.dropna(subset=["state_fips"])   # Drop rows where state_fips is NaN
+
+    # state_fips stays as zero-padded strings — DO NOT convert to int here
 
     return df
 
 df = load_data()
-st.sidebar.caption(
-    f"Rows after cleaning: {len(df):,}  |  Gift $ min–max: "
-    f"{df['Gift Amount'].min():,.0f} – {df['Gift Amount'].max():,.0f}"
-)
-
+st.sidebar.caption(f"Rows after cleaning: {len(df):,}  |  Gift $ min–max: "
+                   f"{df['Gift Amount'].min():,.0f} – {df['Gift Amount'].max():,.0f}")
 st.write("Data type of df['state_fips']:", df["state_fips"].dtype)
 st.write("Sample values from df['state_fips']:", df["state_fips"].unique()[:10])
 
@@ -73,18 +73,19 @@ if mot_pick != "All":
     mask &= df["Gift Allocation"] == mot_pick
 df_filt = df[mask]
 
-# Aggregate gifts by state_fips
+# right after you build df_filt
 state_totals = (
     df_filt.groupby("state_fips", as_index=False)["Gift Amount"].sum()
            .rename(columns={"Gift Amount": "total_gift"})
 )
 
-# Load topojson IDs for comparison
+# Load topojson from vega datasets
 url = data.us_10m.url
 with urllib.request.urlopen(url) as response:
     topojson_data = json.load(response)
 
-topo_ids = {str(feature["id"]) for feature in topojson_data["objects"]["states"]["geometries"]}
+# Zero-pad topojson IDs to 2 digits for exact matching with df
+topo_ids = {str(int(feature["id"])).zfill(2) for feature in topojson_data["objects"]["states"]["geometries"]}
 df_state_fips = set(state_totals["state_fips"])
 
 missing_in_topo = df_state_fips - topo_ids
@@ -96,9 +97,12 @@ st.write("State IDs in topojson not in data:", missing_in_df)
 # ---------- SELECTION DEFINITIONS --------------------------------------------
 state_select       = alt.selection_point(fields=["state_fips"], toggle=False, empty="all")
 brush              = alt.selection_interval(encodings=["x"])
-subcategory_select = alt.selection_point(fields=["Allocation Subcategory"], toggle="event", empty="all")
+subcategory_select = alt.selection_point(fields=["Allocation Subcategory"],
+                                         toggle="event", empty="all")
 
 # ---------- CHOROPLETH MAP ---------------------------------------------------
+states = alt.topo_feature(data.us_10m.url, "states")
+st.write(state_totals.head())
 map_chart = (
     alt.Chart(states)
     .mark_geoshape(stroke="white", strokeWidth=0.5)
@@ -118,14 +122,18 @@ map_chart = (
     )
     .transform_lookup(
         lookup="id",
-        from_=alt.LookupData(state_totals, key="state_fips", fields=["total_gift"])
+        from_=alt.LookupData(
+            state_totals,
+            key="state_fips",
+            fields=["total_gift"]
+        )
     )
     .add_params(state_select)
     .project(type="albersUsa")
     .properties(width=380, height=250)
 )
 
-st.text("✅ map built")
+st.text("✅ map built")          # temporary breadcrumb
 
 # ---------- LINE: GIFTS BY YEAR ----------------------------------------------
 line_chart = (
@@ -136,14 +144,14 @@ line_chart = (
         x=alt.X("Year:O", sort="ascending"),
         y=alt.Y("sum(Gift Amount):Q", title="Total Gifts ($)"),
         tooltip=[
-            alt.Tooltip("Year:O", title="Year"),
+            alt.Tooltip("Year:O",             title="Year"),
             alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
         ]
     )
     .add_params(state_select, brush)
     .properties(width=380, height=250)
 )
-st.text("✅ line chart built")
+st.text("✅ line chart built")          # temporary breadcrumb
 
 # ---------- BAR: TOTAL BY COLLEGE --------------------------------------------
 bar_college = (
@@ -151,17 +159,17 @@ bar_college = (
     .transform_filter(state_select)
     .mark_bar()
     .encode(
-        y=alt.Y("College:N", sort="-x", title="College"),
-        x=alt.X("sum(Gift Amount):Q", title="Total Gifts ($)"),
+        y=alt.Y("College:N",           sort="-x", title="College"),
+        x=alt.X("sum(Gift Amount):Q",  title="Total Gifts ($)"),
         tooltip=[
-            alt.Tooltip("College:N", title="College"),
-            alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
+            alt.Tooltip("College:N",           title="College"),
+            alt.Tooltip("sum(Gift Amount):Q",  title="Total Gifts ($)", format=",.0f")
         ]
     )
     .add_params(state_select)
     .properties(width=380, height=400)
 )
-st.text("✅ bar built")
+st.text("✅ bar built")          # temporary breadcrumb
 
 # ---------- BAR: TOTAL BY SUB-CATEGORY ---------------------------------------
 bar_sub = (
@@ -170,35 +178,34 @@ bar_sub = (
     .transform_filter(brush)
     .mark_bar()
     .encode(
-        y=alt.Y("Allocation Subcategory:N", sort="-x", title="Allocation Sub-category"),
+        y=alt.Y("Allocation Subcategory:N", sort="-x",
+                title="Allocation Sub-category"),
         x=alt.X("sum(Gift Amount):Q", title="Total Gifts ($)"),
         color=alt.condition(
             subcategory_select, alt.value("#1f77b4"), alt.value("lightgray")
         ),
         tooltip=[
             alt.Tooltip("Allocation Subcategory:N", title="Sub-category"),
-            alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
+            alt.Tooltip("sum(Gift Amount):Q",       title="Total Gifts ($)", format=",.0f")
         ]
     )
     .add_params(state_select, subcategory_select)
     .properties(width=380, height=400)
 )
-st.text("✅ bar sub built")
+st.text("✅ bar sub built")          # temporary breadcrumb
 
-# Layout
+opacity=alt.condition(state_select, alt.value(1), alt.value(0.3))
 upper  = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
 lower  = alt.hconcat(bar_college, bar_sub)
 layout = alt.vconcat(upper, lower)
 
 st.altair_chart(layout, use_container_width=True)
 
-# Additional debug info for confirmation
 st.write("Data type of df['state_fips']:", df["state_fips"].dtype)
 st.write("Sample values from df['state_fips']:", df["state_fips"].unique()[:10])
 st.write("Data type of state_totals['state_fips']:", state_totals["state_fips"].dtype)
 st.write("Sample values from state_totals['state_fips']:", state_totals["state_fips"].unique()[:10])
 
 st.write("Topojson sample feature id type:", type(states["features"][0]["id"]))
-
 
 
