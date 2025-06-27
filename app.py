@@ -66,7 +66,7 @@ map_chart = (
         color=alt.condition(
             state_select,
             alt.Color("sum(Gift Amount):Q",
-                      scale=alt.Scale(scheme="blues",domain=[0, None])
+                      scale=alt.Scale(scheme="blues",domain=[0, None]),
                       title="Total Gifts ($)"),
             alt.value("lightgray")
         ),
