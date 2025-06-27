@@ -11,6 +11,10 @@ alt.data_transformers.disable_max_rows()
 from vega_datasets import data
 import us
 
+
+states = alt.topo_feature(data.us_10m.url, "states")
+st.write("Topojson sample feature id type:", type(states["features"][0]["id"]))
+
 st.set_page_config(
     page_title="University Donor Dashboard",
     layout="wide"
@@ -48,6 +52,9 @@ def load_data():
 df = load_data()
 st.sidebar.caption(f"Rows after cleaning: {len(df):,}  |  Gift $ min–max: "
                    f"{df['Gift Amount'].min():,.0f} – {df['Gift Amount'].max():,.0f}")
+st.write("Data type of df['state_fips']:", df["state_fips"].dtype)
+st.write("Sample values from df['state_fips']:", df["state_fips"].unique()[:10])
+
 # ---------- SIDEBAR FILTERS --------------------------------------------------
 st.sidebar.header("Filters")
 st.sidebar.caption(f"Altair version: {alt.__version__}")
@@ -69,7 +76,9 @@ state_totals = (
     df_filt.groupby("state_fips", as_index=False)["Gift Amount"].sum()
            .rename(columns={"Gift Amount": "total_gift"})
 )
-st.write(df_filt.head())
+st.write("Data type of state_totals['state_fips']:", state_totals["state_fips"].dtype)
+st.write("Sample values from state_totals['state_fips']:", state_totals["state_fips"].unique()[:10])
+
 
 # ---------- SELECTION DEFINITIONS --------------------------------------------
 state_select       = alt.selection_point(fields=["state_fips"], toggle=False, empty="all")
