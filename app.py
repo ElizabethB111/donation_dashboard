@@ -141,6 +141,64 @@ line_chart = (
         ]
     )
     .add_params(state_select, brush)
+    .properties(width=380, height=250)
+)
+st.text("✅ line chart built")
+
+# ---------- BAR: TOTAL BY COLLEGE --------------------------------------------
+bar_college = (
+    alt.Chart(df_filt)
+    .transform_filter(state_select)
+    .mark_bar()
+    .encode(
+        y=alt.Y("College:N", sort="-x", title="College"),
+        x=alt.X("sum(Gift Amount):Q", title="Total Gifts ($)"),
+        tooltip=[
+            alt.Tooltip("College:N", title="College"),
+            alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
+        ]
+    )
+    .add_params(state_select)
+    .properties(width=380, height=400)
+)
+st.text("✅ bar built")
+
+# ---------- BAR: TOTAL BY SUB-CATEGORY ---------------------------------------
+bar_sub = (
+    alt.Chart(df_filt)
+    .transform_filter(state_select)
+    .transform_filter(brush)
+    .mark_bar()
+    .encode(
+        y=alt.Y("Allocation Subcategory:N", sort="-x", title="Allocation Sub-category"),
+        x=alt.X("sum(Gift Amount):Q", title="Total Gifts ($)"),
+        color=alt.condition(
+            subcategory_select, alt.value("#1f77b4"), alt.value("lightgray")
+        ),
+        tooltip=[
+            alt.Tooltip("Allocation Subcategory:N", title="Sub-category"),
+            alt.Tooltip("sum(Gift Amount):Q", title="Total Gifts ($)", format=",.0f")
+        ]
+    )
+    .add_params(state_select, subcategory_select)
+    .properties(width=380, height=400)
+)
+st.text("✅ bar sub built")
+
+# Layout
+upper  = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
+lower  = alt.hconcat(bar_college, bar_sub)
+layout = alt.vconcat(upper, lower)
+
+st.altair_chart(layout, use_container_width=True)
+
+# Additional debug info for confirmation
+st.write("Data type of df['state_fips']:", df["state_fips"].dtype)
+st.write("Sample values from df['state_fips']:", df["state_fips"].unique()[:10])
+st.write("Data type of state_totals['state_fips']:", state_totals["state_fips"].dtype)
+st.write("Sample values from state_totals['state_fips']:", state_totals["state_fips"].unique()[:10])
+
+st.write("Topojson sample feature id type:", type(states["features"][0]["id"]))
 
 
 
