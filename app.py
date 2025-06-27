@@ -11,17 +11,6 @@ alt.data_transformers.disable_max_rows()
 from vega_datasets import data
 import us
 
-st.altair_chart(
-    alt.Chart(pd.DataFrame({"x": [1, 2, 3], "y": [1, 4, 9]}))
-      .mark_line()
-      .encode(
-          x="x:Q",      # ← keyword, add type if you like
-          y="y:Q"
-      )
-)
-
-st.stop()      # leave this here so only the test chart runs
-
 st.set_page_config(
     page_title="University Donor Dashboard",
     layout="wide"
@@ -103,6 +92,7 @@ map_chart = (
     .project(type="albersUsa")
     .properties(width=380, height=250)
 )
+st.text("✅ map built")          # temporary breadcrumb
 
 # ---------- LINE: GIFTS BY YEAR ----------------------------------------------
 line_chart = (
