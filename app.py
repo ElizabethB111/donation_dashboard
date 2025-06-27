@@ -38,8 +38,9 @@ def load_data():
     
     # --- keep numeric FIPS codes so they match the topojson ----------------------
 
-    state_id = {s.abbr: int(s.fips) for s in us.states.STATES}   # ints: 1, 2, 4, …
-    df["state_fips"] = df["State"].map(state_id).astype("Int64")  # nullable int
+    # --- FIPS codes as the 2-digit strings that match topojson -------------------
+    state_id = {s.abbr: s.fips for s in us.states.STATES}   # s.fips is already "01"
+    df["state_fips"] = df["State"].map(state_id)            # keep as string → "01", "06", …
 
 
     return df
