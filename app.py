@@ -16,21 +16,20 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------- DATA -------------------------------------------------------------
+# ---------- DATA ----------
 @st.cache_data
 def load_data():
     df = pd.read_csv("university-donations.csv")
-
-    # tidy dates
-    df["Gift Date"] = pd.to_datetime(df["Gift Date"])
+    df["Gift Date"] = pd.to_datetime(df["Gift Date"], format="%Y-%m-%d")
     df["Year"]      = df["Gift Date"].dt.year
     df["YearMonth"] = df["Gift Date"].dt.to_period("M").astype(str)
 
-    # US-state two-letter code → FIPS id (needed for map join)
-    state_id = {s.abbr: int(s.fips) for s in us.states.STATES}
-    df["state_fips"] = df["State"].map(state_id)
+    # 1️⃣ keep the string FIPS codes exactly as us.states gives them ("01", "06", …)
+    state_id = {s.abbr: s.fips for s in us.states.STATES}   # ← drop int()
+    df["state_fips"] = df["State"].map(state_id).astype(str) # ← ensure str
 
     return df
+
 
 
 df = load_data()
