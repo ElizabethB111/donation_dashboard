@@ -69,6 +69,7 @@ state_totals = (
     df_filt.groupby("state_fips", as_index=False)["Gift Amount"].sum()
            .rename(columns={"Gift Amount": "total_gift"})
 )
+st.write(df_filt.head())
 
 # ---------- SELECTION DEFINITIONS --------------------------------------------
 state_select       = alt.selection_point(fields=["state_fips"], toggle=False, empty="all")
