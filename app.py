@@ -37,8 +37,10 @@ def load_data():
     df["YearMonth"] = df["Gift Date"].dt.to_period("M").astype(str)
     
     # --- keep numeric FIPS codes so they match the topojson ----------------------
-    state_id = {s.abbr: int(s.fips) for s in us.states.STATES}
-    df["state_fips"] = df["State"].map(state_id)      # int, not str
+    # --- FIPS codes as 2-digit strings ("01", "06", …) ---------------------------
+    state_id = {s.abbr: s.fips for s in us.states.STATES}        # s.fips is already "01"
+    df["state_fips"] = df["State"].map(state_id).astype(str).str.zfill(2)
+
 
     return df
 
