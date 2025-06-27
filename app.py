@@ -179,7 +179,8 @@ layout = alt.vconcat(upper, lower)
 st.altair_chart(layout, use_container_width=True)
 
 st.write(df_filt.head())
-
+df["state_fips"].dtype
+state_totals["state_fips"].dtype
 
 # ---- test one chart at a time ----
 # st.altair_chart(map_chart,    use_container_width=True)   # map only
