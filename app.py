@@ -110,6 +110,7 @@ line_chart = (
     .add_params(brush)
     .properties(width=380, height=250)
 )
+st.text("✅ line chart built")          # temporary breadcrumb
 
 # ---------- BAR: TOTAL BY COLLEGE --------------------------------------------
 bar_college = (
@@ -126,6 +127,7 @@ bar_college = (
     )
     .properties(width=380, height=400)
 )
+st.text("✅ bar built")          # temporary breadcrumb
 
 # ---------- BAR: TOTAL BY SUB-CATEGORY ---------------------------------------
 bar_sub = (
@@ -148,6 +150,7 @@ bar_sub = (
     .add_params(subcategory_select)
     .properties(width=380, height=400)
 )
+st.text("✅ bar sub built")          # temporary breadcrumb
 
 # ---------- LAYOUT -----------------------------------------------------------
 upper  = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
