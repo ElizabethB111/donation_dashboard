@@ -13,7 +13,6 @@ import us
 
 
 states = alt.topo_feature(data.us_10m.url, "states")
-st.write("Topojson sample feature id type:", type(states["features"][0]["id"]))
 
 st.set_page_config(
     page_title="University Donor Dashboard",
@@ -43,9 +42,10 @@ def load_data():
     # --- keep numeric FIPS codes so they match the topojson ----------------------
 
     # --- FIPS codes as the 2-digit strings that match topojson -------------------
-    state_id = {s.abbr: s.fips for s in us.states.STATES}   # s.fips is already "01"
-    df["state_fips"] = df["State"].map(state_id)            # keep as string → "01", "06", …
 
+    state_id = {s.abbr: s.fips for s in us.states.STATES}  # keep as string with leading zeros
+    df["state_fips"] = df["State"].map(state_id)
+    
 
     return df
 
