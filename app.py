@@ -11,12 +11,17 @@ alt.data_transformers.disable_max_rows()
 from vega_datasets import data
 import us
 
-
-# ── tiny smoke-test chart ─────────────────────
 st.altair_chart(
-    alt.Chart(pd.DataFrame({'x': [1,2,3], 'y': [1,4,9]})).mark_line().encode('x', 'y')
+    alt.Chart(pd.DataFrame({"x": [1, 2, 3], "y": [1, 4, 9]}))
+      .mark_line()
+      .encode(
+          x="x:Q",      # ← keyword, add type if you like
+          y="y:Q"
+      )
 )
-st.stop()  #  <-- TEMPORARY
+
+st.stop()      # leave this here so only the test chart runs
+
 st.set_page_config(
     page_title="University Donor Dashboard",
     layout="wide"
