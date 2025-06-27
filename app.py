@@ -10,22 +10,6 @@ alt.data_transformers.disable_max_rows()
 
 from vega_datasets import data
 import us
-import json
-import urllib.request
-
-# Load topojson from vega datasets
-url = data.us_10m.url
-with urllib.request.urlopen(url) as response:
-    topojson_data = json.load(response)
-
-topo_ids = {str(feature["id"]) for feature in topojson_data["objects"]["states"]["geometries"]}
-df_state_fips = set(state_totals["state_fips"])
-
-missing_in_topo = df_state_fips - topo_ids
-missing_in_df = topo_ids - df_state_fips
-
-st.write("State FIPS codes in data not in topojson:", missing_in_topo)
-st.write("State IDs in topojson not in data:", missing_in_df)
 
 states = alt.topo_feature(data.us_10m.url, "states")
 
@@ -91,9 +75,23 @@ state_totals = (
     df_filt.groupby("state_fips", as_index=False)["Gift Amount"].sum()
            .rename(columns={"Gift Amount": "total_gift"})
 )
-st.write("Data type of state_totals['state_fips']:", state_totals["state_fips"].dtype)
-st.write("Sample values from state_totals['state_fips']:", state_totals["state_fips"].unique()[:10])
 
+import json
+import urllib.request
+
+# Load topojson from vega datasets
+url = data.us_10m.url
+with urllib.request.urlopen(url) as response:
+    topojson_data = json.load(response)
+
+topo_ids = {str(feature["id"]) for feature in topojson_data["objects"]["states"]["geometries"]}
+df_state_fips = set(state_totals["state_fips"])
+
+missing_in_topo = df_state_fips - topo_ids
+missing_in_df = topo_ids - df_state_fips
+
+st.write("State FIPS codes in data not in topojson:", missing_in_topo)
+st.write("State IDs in topojson not in data:", missing_in_df)
 
 # ---------- SELECTION DEFINITIONS --------------------------------------------
 state_select       = alt.selection_point(fields=["state_fips"], toggle=False, empty="all")
