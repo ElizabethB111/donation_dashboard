@@ -178,9 +178,16 @@ layout = alt.vconcat(upper, lower)
 
 st.altair_chart(layout, use_container_width=True)
 
-st.write(df_filt.head())
-df["state_fips"].dtype
-state_totals["state_fips"].dtype
+st.write("Data type of df['state_fips']:", df["state_fips"].dtype)
+st.write("Sample values from df['state_fips']:", df["state_fips"].unique()[:10])
+st.write("Data type of state_totals['state_fips']:", state_totals["state_fips"].dtype)
+st.write("Sample values from state_totals['state_fips']:", state_totals["state_fips"].unique()[:10])
+import altair as alt
+from vega_datasets import data
+
+states = alt.topo_feature(data.us_10m.url, "states")
+st.write("Topojson sample feature id type:", type(states["features"][0]["id"]))
+
 
 # ---- test one chart at a time ----
 # st.altair_chart(map_chart,    use_container_width=True)   # map only
