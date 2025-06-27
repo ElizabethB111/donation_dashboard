@@ -10,13 +10,13 @@ alt.data_transformers.disable_max_rows()
 
 from vega_datasets import data
 import us
-st.stop()  #  <-- TEMPORARY
+
 
 # ── tiny smoke-test chart ─────────────────────
 st.altair_chart(
     alt.Chart(pd.DataFrame({'x': [1,2,3], 'y': [1,4,9]})).mark_line().encode('x', 'y')
 )
-
+st.stop()  #  <-- TEMPORARY
 st.set_page_config(
     page_title="University Donor Dashboard",
     layout="wide"
