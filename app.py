@@ -132,7 +132,7 @@ map_chart = (
 # ---------- LINE: GIFTS BY YEAR ----------------------------------------------
 line_chart = (
     alt.Chart(df_filt)
-    #.transform_filter(state_select)
+    .transform_filter(state_select)
     .mark_line(point=True)
     .encode(
         x=alt.X("Year:O", sort="ascending"),
@@ -149,7 +149,7 @@ line_chart = (
 # ---------- BAR: TOTAL BY COLLEGE --------------------------------------------
 bar_college = (
     alt.Chart(df_filt)
-    #.transform_filter(state_select)
+    .transform_filter(state_select)
     .mark_bar()
     .encode(
         y=alt.Y("College:N", sort="-x", title="College"),
@@ -166,7 +166,7 @@ bar_college = (
 # ---------- BAR: TOTAL BY SUB-CATEGORY ---------------------------------------
 bar_sub = (
     alt.Chart(df_filt)
-    #.transform_filter(state_select)
+    .transform_filter(state_select)
     .transform_filter(brush)
     .mark_bar()
     .encode(
