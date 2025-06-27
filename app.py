@@ -86,7 +86,7 @@ map_chart = (
         color=alt.condition(
             state_select,
             alt.Color(
-                "total_gift:Q",                       # ← no sum(), just the field
+                "total_gift:Q",                       # ← use looked-up field
                 scale=alt.Scale(scheme="blues", domain=[0, None]),
                 title="Total Gifts ($)"
             ),
@@ -94,14 +94,14 @@ map_chart = (
         ),
         tooltip=[
             alt.Tooltip("total_gift:Q", title="Total Gifts ($)", format=",.0f")
-        ]
+        ]                                          # ← same here
     )
     .transform_lookup(
-        lookup="id",                      # int IDs from the topojson
+        lookup="id",
         from_=alt.LookupData(
-            state_totals,                 # 1 row per state
-            key="state_fips",             # int keys too
-            fields=["total_gift"]
+            state_totals,
+            key="state_fips",
+            fields=["total_gift"]                   # ← field name matches
         )
     )
     .add_params(state_select)
