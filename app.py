@@ -116,7 +116,7 @@ st.text("✅ map built")          # temporary breadcrumb
 # ---------- LINE: GIFTS BY YEAR ----------------------------------------------
 line_chart = (
     alt.Chart(df_filt)
-    #.transform_filter(state_select)
+    .transform_filter(state_select)
     .mark_line(point=True)
     .encode(
         x=alt.X("Year:O", sort="ascending"),
@@ -134,7 +134,7 @@ st.text("✅ line chart built")          # temporary breadcrumb
 # ---------- BAR: TOTAL BY COLLEGE --------------------------------------------
 bar_college = (
     alt.Chart(df_filt)
-    #.transform_filter(state_select)
+    .transform_filter(state_select)
     .mark_bar()
     .encode(
         y=alt.Y("College:N",           sort="-x", title="College"),
@@ -152,7 +152,7 @@ st.text("✅ bar built")          # temporary breadcrumb
 # ---------- BAR: TOTAL BY SUB-CATEGORY ---------------------------------------
 bar_sub = (
     alt.Chart(df_filt)
-    #.transform_filter(state_select)
+    .transform_filter(state_select)
     .transform_filter(brush)
     .mark_bar()
     .encode(
