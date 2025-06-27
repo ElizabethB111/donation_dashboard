@@ -37,6 +37,7 @@ df = load_data()
 
 # ---------- SIDEBAR FILTERS --------------------------------------------------
 st.sidebar.header("Filters")
+st.sidebar.caption(f"Altair version: {alt.__version__}")
 col_opts = ["All"] + sorted(df["College"].unique())
 mot_opts = ["All"] + sorted(df["Gift Allocation"].unique())
 
