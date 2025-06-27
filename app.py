@@ -158,17 +158,21 @@ bar_sub = (
 )
 st.text("✅ bar sub built")          # temporary breadcrumb
 
-# ---------- LAYOUT -----------------------------------------------------------
-upper  = alt.hconcat(map_chart, line_chart).resolve_scale(color="independent")
-lower  = alt.hconcat(bar_college, bar_sub)
-layout = alt.vconcat(upper, lower)
+layout = (
+    alt.vconcat(
+        alt.hconcat(map_chart, line_chart).resolve_scale(color="independent"),
+        alt.hconcat(bar_college, bar_sub)
+    )
+    .add_params(state_select, brush, subcategory_select)
+)
 
-# st.altair_chart(layout, use_container_width=True)
+st.altair_chart(layout, use_container_width=True)
+
 
 # ---- test one chart at a time ----
 # st.altair_chart(map_chart,    use_container_width=True)   # map only
 # st.altair_chart(line_chart,   use_container_width=True)   # line only
 # st.altair_chart(bar_college,  use_container_width=True)   # college bars
-st.altair_chart(bar_sub,      use_container_width=True)   # sub-category bars
+# st.altair_chart(bar_sub,      use_container_width=True)   # sub-category bars
 
 
