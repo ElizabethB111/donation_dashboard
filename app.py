@@ -20,16 +20,21 @@ st.set_page_config(
 @st.cache_data
 def load_data():
     df = pd.read_csv("university-donations.csv")
-    df["Gift Date"] = pd.to_datetime(df["Gift Date"], format="%Y-%m-%d")
+
+    # 1️⃣  parse all date strings, whatever the format
+    df["Gift Date"] = pd.to_datetime(df["Gift Date"], errors="coerce")
+
+    # 2️⃣  discard rows whose dates could not be read
+    df = df.dropna(subset=["Gift Date"])
+
     df["Year"]      = df["Gift Date"].dt.year
     df["YearMonth"] = df["Gift Date"].dt.to_period("M").astype(str)
 
-    # 1️⃣ keep the string FIPS codes exactly as us.states gives them ("01", "06", …)
-    state_id = {s.abbr: s.fips for s in us.states.STATES}   # ← drop int()
-    df["state_fips"] = df["State"].map(state_id).astype(str) # ← ensure str
+    # keep FIPS codes as the two-digit strings
+    state_id = {s.abbr: s.fips for s in us.states.STATES}
+    df["state_fips"] = df["State"].map(state_id).astype(str)
 
     return df
-
 
 
 df = load_data()
