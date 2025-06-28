@@ -4,23 +4,23 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-import us  # make sure "us" is in requirements.txt
+import us                        # make sure "us" is in requirements.txt
 
-# ------------- PAGE CONFIG & ALTAIR OPTIONS ------------------------
+# ---------- PAGE CONFIG & ALTAIR OPTIONS ----------
 st.set_page_config(
     page_title="University Donor Dashboard",
     layout="wide",
 )
-alt.data_transformers.disable_max_rows()  # so Altair won’t truncate large dfs
+alt.data_transformers.disable_max_rows()  # avoid row‑limit warnings
 
-# ------------- LOAD DATA -------------------------------------------
+# ---------- LOAD DATA ----------
 @st.cache_data(show_spinner=False)
-def load_data("university-donations.csv": str) -> pd.DataFrame:
+def load_data(csv_path: str) -> pd.DataFrame:
     df0 = pd.read_csv(csv_path)
 
-    # --- State FIPS lookups (only once, so fine to do here) ----------
-    state_id_map   = {state.abbr: int(state.fips)  for state in us.states.STATES}
-    state_name_map = {int(state.fips): state.name  for state in us.states.STATES}
+    # Map state abbreviations → FIPS codes → names
+    state_id_map   = {s.abbr: int(s.fips) for s in us.states.STATES}
+    state_name_map = {int(s.fips): s.name for s in us.states.STATES}
 
     df0["state_fips"] = (
         df0["State"]
@@ -29,16 +29,16 @@ def load_data("university-donations.csv": str) -> pd.DataFrame:
            .astype(int)
     )
 
-    # Add Gift Year if missing
+    # Add Gift Year if missing
     if "Gift Year" not in df0.columns:
         df0["Gift Year"] = pd.to_datetime(df0["Gift Date"]).dt.year.astype(str)
 
     return df0, state_name_map
 
-# Path can be relative in Streamlit Cloud repo
-df, state_name_map = load_data("donations.csv")
+# The CSV lives at repo root ➜ use that relative path
+df, state_name_map = load_data("university-donations.csv")
 
-# ------------- AGGREGATED DATA (for a possible map later) ----------
+# ---------- (OPTIONAL) STATE‑LEVEL AGGREGATE ----------
 state_agg = (
     df.groupby("state_fips")
       .agg(
@@ -51,14 +51,12 @@ state_agg = (
 )
 state_agg["State Name"] = state_agg["state_fips"].map(state_name_map)
 
-# ------------- SELECTIONS ------------------------------------------
+# ---------- SELECTIONS ----------
 selection_alloc = alt.selection_point(fields=["Gift Allocation"], name="SelectAlloc")
 brush_year      = alt.selection_interval(encodings=["x"], name="BrushYear")
+reset_click     = alt.selection_point(on="click", clear="mouseup", name="ResetClick")
 
-# --- If you want to reset by clicking blank space: ---------------
-reset_click = alt.selection_point(on="click", clear="mouseup", name="ResetClick")
-
-# ------------- MAIN CHARTS ----------------------------------------
+# ---------- CHARTS ----------
 bar_alloc = (
     alt.Chart(df)
         .mark_bar()
@@ -111,7 +109,7 @@ bar_subcat = (
         .properties(width=850, height=300, title="Breakdown by Allocation Subcategory")
 )
 
-# ------------- LAYOUT (single Altair spec so linking works) --------
+# ---------- LAYOUT ----------
 dashboard = alt.vconcat(
     alt.hconcat(bar_alloc, line_year).resolve_scale(color="independent"),
     bar_subcat,
@@ -120,12 +118,12 @@ dashboard = alt.vconcat(
 
 st.altair_chart(dashboard, use_container_width=True)
 
-# ------------- OPTIONAL: SIDEBAR INFO / RAW DATA TOGGLE -----------
+# ---------- SIDEBAR ----------
 with st.sidebar:
     st.header("About")
     st.markdown(
         """
-        **Brushing & Linking Demo**
+        **Brushing & Linking Demo**
 
         * Click a bar to filter by **Gift Allocation**  
         * Drag across the year axis to focus on a time window  
