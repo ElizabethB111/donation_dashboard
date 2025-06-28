@@ -15,7 +15,7 @@ alt.data_transformers.disable_max_rows()  # so Altair won’t truncate large dfs
 
 # ------------- LOAD DATA -------------------------------------------
 @st.cache_data(show_spinner=False)
-def load_data(csv_path: str) -> pd.DataFrame:
+def load_data("university-donations.csv": str) -> pd.DataFrame:
     df0 = pd.read_csv(csv_path)
 
     # --- State FIPS lookups (only once, so fine to do here) ----------
